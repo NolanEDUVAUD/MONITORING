@@ -1,0 +1,56 @@
+# Configuration des serveurs à monitorer
+# Les agents s'enregistrent automatiquement, il suffit de définir les serveurs ici aussi
+
+servers:
+  - name: "HPE-ProLiant-DL360"
+    type: "linux"
+    alias: "srv-prod"
+    alerts:
+      cpu: 80
+      ram: 85
+      temp: 75
+      disk: 90
+    
+  - name: "Windows-11-Server-1"
+    type: "windows"
+    alias: "win-srv-01"
+    alerts:
+      cpu: 75
+      ram: 80
+      temp: 70
+      disk: 85
+    
+  - name: "Windows-11-Server-2"
+    type: "windows"
+    alias: "win-srv-02"
+    alerts:
+      cpu: 75
+      ram: 80
+      temp: 70
+      disk: 85
+      
+  - name: "Dell-Optiplex-Ubuntu"
+    type: "linux"
+    alias: "ubuntu-dev"
+    alerts:
+      cpu: 70
+      ram: 75
+      temp: 65
+      disk: 80
+
+# Token de sécurité pour l'API (même que dans docker-compose.yml)
+api:
+  #token: "banana_split_2024"
+  port: 8888
+  refresh_interval: 3  # secondes
+
+# Thème Gruvbox Dark Hard
+theme:
+  name: "gruvbox-dark-hard"
+  colors:
+    background: "#1d2021"
+    foreground: "#ebdbb2"
+    accent: "#b8bb26"
+    warning: "#fabd2f"
+    error: "#fb4934"
+    info: "#83a598"

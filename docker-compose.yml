@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  hypermonitor:
+    build: .
+    container_name: hypermonitor-server
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./config:/app/config
+      - ./data:/app/data
+    environment:
+      - FLASK_ENV=production
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+    networks:
+      - monitoring
+
+networks:
+  monitoring:
+    driver: bridge
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

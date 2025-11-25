@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HyperMonitor Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #282c34 0%, #1e1e1e 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px;
+            background: rgba(40, 44, 52, 0.8);
+            border-radius: 10px;
+            border: 1px solid #3c3f47;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            color: #7dbf7d;
+        }
+
+        .subtitle {
+            color: #b0b0b0;
+            font-size: 0.95em;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: rgba(60, 63, 71, 0.6);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #3c3f47;
+            text-align: center;
+        }
+
+        .stat-label {
+            color: #b0b0b0;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            color: #7dbf7d;
+            font-weight: bold;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+            margin: 5px 0;
+        }
+
+        .status-online {
+            background: #7dbf7d;
+            color: #1e1e1e;
+        }
+
+        .server-item {
+            background: rgba(60, 63, 71, 0.4);
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border: 1px solid #3c3f47;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .server-info h3 {
+            color: #7dbf7d;
+            margin-bottom: 5px;
+        }
+
+        .server-details {
+            color: #b0b0b0;
+            font-size: 0.9em;
+        }
+
+        h2 {
+            color: #7dbf7d;
+            margin-bottom: 20px;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: #b0b0b0;
+            border-top: 1px solid #3c3f47;
+        }
+
+        .empty-state {
+            color: #b0b0b0;
+            text-align: center;
+            padding: 40px;
+            background: rgba(60, 63, 71, 0.4);
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>HyperMonitor</h1>
+            <p class="subtitle">Monitoring Distribué</p>
+        </header>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Serveurs Actifs</div>
+                <div class="stat-value" id="activeServers">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">CPU Moyen</div>
+                <div class="stat-value" id="avgCpu">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">RAM Moyenne</div>
+                <div class="stat-value" id="avgRam">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Disque Moyen</div>
+                <div class="stat-value" id="avgDisk">-</div>
+            </div>
+        </div>
+
+        <h2>📊 Serveurs Connectés</h2>
+        <div id="serversList" class="empty-state">Chargement...</div>
+
+        <footer>
+            <p>HyperMonitor v2.0</p>
+        </footer>
+    </div>
+
+    <script>
+        async function loadServers() {
+            try {
+                const response = await fetch('/api/servers/json');
+                const data = await response.json();
+                
+                let activeCount = 0;
+                let totalCpu = 0;
+                let totalRam = 0;
+                let totalDisk = 0;
+
+                const serversList = document.getElementById('serversList');
+                serversList.innerHTML = '';
+
+                if (data.servers && data.servers.length > 0) {
+                    activeCount = data.servers.length;
+
+                    data.servers.forEach(server => {
+                        const cpuPercent = server.cpu || 0;
+                        const ramPercent = server.ram || 0;
+                        const diskPercent = server.disk || 0;
+                        totalCpu += cpuPercent;
+                        totalRam += ramPercent;
+                        totalDisk += diskPercent;
+
+                        const item = document.createElement('div');
+                        item.className = 'server-item';
+                        item.innerHTML = `
+                            <div class="server-info">
+                                <h3>${server.name}</h3>
+                                <div class="server-details">
+                                    CPU: ${cpuPercent.toFixed(1)}% | RAM: ${ramPercent.toFixed(1)}% | Disk: ${diskPercent.toFixed(1)}%
+                                </div>
+                            </div>
+                            <span class="status-badge status-online">ONLINE</span>
+                        `;
+                        serversList.appendChild(item);
+                    });
+
+                    const avgCpu = (totalCpu / activeCount).toFixed(1);
+                    const avgRam = (totalRam / activeCount).toFixed(1);
+                    const avgDisk = (totalDisk / activeCount).toFixed(1);
+
+                    document.getElementById('activeServers').textContent = activeCount;
+                    document.getElementById('avgCpu').textContent = avgCpu + '%';
+                    document.getElementById('avgRam').textContent = avgRam + '%';
+                    document.getElementById('avgDisk').textContent = avgDisk + '%';
+                } else {
+                    serversList.innerHTML = '<div class="empty-state">Aucun serveur connecté</div>';
+                    document.getElementById('activeServers').textContent = '0';
+                    document.getElementById('avgCpu').textContent = '-';
+                    document.getElementById('avgRam').textContent = '-';
+                    document.getElementById('avgDisk').textContent = '-';
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                document.getElementById('serversList').innerHTML = '<div class="empty-state">Erreur de connexion</div>';
+            }
+        }
+
+        loadServers();
+        setInterval(loadServers, 3000);
+    </script>
+</body>
+</html>

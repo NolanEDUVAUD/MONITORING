@@ -1,0 +1,17 @@
+[Unit]
+Description=HyperMonitor Agent - System Monitoring
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=hypermonitor
+WorkingDirectory=/opt/hypermonitor/agent
+ExecStart=/usr/bin/python3 agent.py --url http://localhost:8888 --interval 3
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
